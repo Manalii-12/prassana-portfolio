@@ -11,7 +11,7 @@ export default function AdminLogin() {
   const router = useRouter();
   const [theme, setTheme] = useState("dark");
   const [form, setForm] = useState({
-    email: "admin@gmail.com",
+    email: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
@@ -153,7 +153,7 @@ export default function AdminLogin() {
                     ? "bg-[#182033] border-gray-700 text-white focus:border-orange-500"
                     : "bg-slate-50 border-slate-300 text-slate-900 focus:border-orange-500"
                 }`}
-                placeholder="admin@gmail.com"
+                placeholder="Enter your email"
                 value={form.email}
                 onChange={(e) =>
                   setForm({
@@ -209,14 +209,6 @@ export default function AdminLogin() {
             )}
           </button>
         </form>
-
-        <div className="mt-6 pt-5 border-t border-inherit text-center">
-          <p className="text-xs opacity-60">
-            Default credentials:{" "}
-            <span className="font-mono font-bold text-orange-500">admin@gmail.com</span> /{" "}
-            <span className="font-mono font-bold text-orange-500">admin123</span>
-          </p>
-        </div>
       </div>
     </div>
   );
