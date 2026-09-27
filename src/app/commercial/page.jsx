@@ -89,6 +89,7 @@ export default function CommercialPage() {
           <ProjectBentoGrid
             projects={projects}
             onOpenVideo={(video) => setActiveVideo(video)}
+            sectionType="commercial"
           />
         )}
       </section>

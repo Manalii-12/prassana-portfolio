@@ -260,6 +260,13 @@ export default function ManageProjects() {
     return 0; // "custom" order preserved as returned by backend / updated by user
   });
 
+  // Helper to determine whether a project is in the top 4 Bento Grid or in More Projects
+  const getCategoryIndex = (project) => {
+    const sameTypeProjects = projects.filter((item) => item.type === project.type);
+    return sameTypeProjects.findIndex((item) => item.id === project.id);
+  };
+
+
   return (
     <AdminLayout>
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
@@ -548,16 +555,35 @@ export default function ManageProjects() {
                           )}
                         </td>
                         <td className="py-3.5 px-3.5 whitespace-nowrap">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
-                              p.type === "commercial"
-                                ? "bg-blue-500/15 text-blue-500 border border-blue-500/25"
-                                : "bg-emerald-500/15 text-emerald-500 border border-emerald-500/25"
-                            }`}
-                          >
-                            {p.type === "commercial" ? <Film size={10} /> : <Video size={10} />}
-                            <span>{p.type}</span>
-                          </span>
+                          <div className="flex flex-col gap-1 items-start">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${
+                                p.type === "commercial"
+                                  ? "bg-blue-500/15 text-blue-500 border border-blue-500/25"
+                                  : "bg-emerald-500/15 text-emerald-500 border border-emerald-500/25"
+                              }`}
+                            >
+                              {p.type === "commercial" ? <Film size={10} /> : <Video size={10} />}
+                              <span>{p.type}</span>
+                            </span>
+                            {(() => {
+                              const catIdx = getCategoryIndex(p);
+                              if (catIdx >= 0 && catIdx < 4) {
+                                return (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                    ⭐ Bento Grid #{catIdx + 1}
+                                  </span>
+                                );
+                              } else if (catIdx >= 4) {
+                                return (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                                    📂 More Projects #{catIdx + 1}
+                                  </span>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </div>
                         </td>
                         <td className="py-3.5 px-3.5 font-medium text-current opacity-80 whitespace-nowrap">
                           {p.category || "-"}
@@ -684,7 +710,7 @@ export default function ManageProjects() {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <span className="font-mono text-orange-500 font-bold text-xs">
                             #{p.id}
                           </span>
@@ -697,6 +723,23 @@ export default function ManageProjects() {
                           >
                             {p.type}
                           </span>
+                          {(() => {
+                            const catIdx = getCategoryIndex(p);
+                            if (catIdx >= 0 && catIdx < 4) {
+                              return (
+                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                  ⭐ Bento Grid #{catIdx + 1}
+                                </span>
+                              );
+                            } else if (catIdx >= 4) {
+                              return (
+                                <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                                  📂 More Projects #{catIdx + 1}
+                                </span>
+                              );
+                            }
+                            return null;
+                          })()}
                         </div>
                         <h4 className="font-bold text-xs sm:text-sm truncate mt-0.5">
                           {p.title || "(Untitled Project)"}

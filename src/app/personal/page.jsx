@@ -89,6 +89,7 @@ export default function PersonalPage() {
           <ProjectBentoGrid
             projects={projects}
             onOpenVideo={(video) => setActiveVideo(video)}
+            sectionType="personal"
           />
         )}
       </section>

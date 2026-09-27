@@ -196,6 +196,19 @@ export default function ProjectsPage() {
             </div>
           </div>
 
+          {/* Bento Grid vs More Projects Info Banner */}
+          <div className="mb-6 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-xs flex items-start gap-3">
+            <Sparkles size={16} className="text-orange-500 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-bold text-orange-400">
+                Automatic Bento Grid & "More Projects" Placement:
+              </p>
+              <p className="opacity-75 leading-relaxed text-[11px]">
+                The first 4 projects of each type (Commercial or Personal) form the signature 4-card Bento Grid. Any additional projects automatically appear in the expandable <strong className="text-white">"More Projects"</strong> section below the grid with the exact same video popup and details!
+              </p>
+            </div>
+          </div>
+
           <form onSubmit={submit} className="space-y-6">
             {/* Visual Type Selector (Cards) */}
             <div>
