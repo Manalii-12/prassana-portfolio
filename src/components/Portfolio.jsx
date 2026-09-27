@@ -67,10 +67,18 @@ export default function Portfolio() {
               <div className="relative overflow-hidden rounded-2xl cursor-pointer h-[340px] sm:h-[380px] md:h-[400px] border border-white/10 group-hover:border-white/30 transition duration-500 shadow-2xl">
                 {/* Background Image (From Admin) */}
                 <img
-                  src={data.commercial_image || "/images/commercial.jpg"}
+                  src={
+                    data.commercial_image
+                      ? data.commercial_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
+                      : "/images/commercial.jpg"
+                  }
                   alt={data.commercial_title || "Commercial Projects"}
                   loading="lazy"
                   decoding="async"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/images/commercial.jpg";
+                  }}
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
 
@@ -99,10 +107,18 @@ export default function Portfolio() {
               <div className="relative overflow-hidden rounded-2xl cursor-pointer h-[340px] sm:h-[380px] md:h-[400px] border border-white/10 group-hover:border-white/30 transition duration-500 shadow-2xl">
                 {/* Background Image (From Admin) */}
                 <img
-                  src={data.personal_image || "/images/personal.jpg"}
+                  src={
+                    data.personal_image
+                      ? data.personal_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
+                      : "/images/personal.jpg"
+                  }
                   alt={data.personal_title || "Personal Projects"}
                   loading="lazy"
                   decoding="async"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/images/personal.jpg";
+                  }}
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
 

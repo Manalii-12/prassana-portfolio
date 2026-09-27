@@ -116,8 +116,16 @@ export default function Hero() {
           >
             {/* Background Image with subtle Ken Burns effect */}
             <img
-              src={banner.background_image || "/images/hero.png"}
+              src={
+                banner.background_image
+                  ? banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
+                  : "/images/hero.png"
+              }
               alt={banner.title || "Hero banner"}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/images/hero.png";
+              }}
               className={`w-full h-full object-cover transition-transform duration-[7000ms] ease-out ${
                 isActive ? "scale-105" : "scale-100"
               }`}

@@ -86,7 +86,11 @@ export function parseVideoUrl(input) {
 
 export function getVideoCover(videoUrl, customCover, fallback = "/images/commercial.jpg") {
   if (customCover && customCover.trim()) {
-    return customCover.trim();
+    let cover = customCover.trim();
+    if (cover.startsWith("http://prassana-backend")) {
+      cover = cover.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+    }
+    return cover;
   }
 
   const parsed = parseVideoUrl(videoUrl);

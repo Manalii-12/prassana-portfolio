@@ -80,10 +80,18 @@ export default function About() {
               <div className="relative w-full max-w-[320px] sm:max-w-[340px] aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-white/15 group bg-black/60">
                 {/* Director Photo */}
                 <img
-                  src={data.image_url || "/images/about.jpg"}
+                  src={
+                    data.image_url
+                      ? data.image_url.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
+                      : "/images/about.jpg"
+                  }
                   alt={data.heading || "About Director"}
                   loading="lazy"
                   decoding="async"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/images/about.jpg";
+                  }}
                   className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                 />
 
