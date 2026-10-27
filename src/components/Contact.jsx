@@ -29,9 +29,28 @@ const DEFAULT_CONTACT = {
 };
 
 export default function Contact() {
-  const [data, setData] = useState(DEFAULT_CONTACT);
+  const [data, setData] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("prasanna_cached_contact_data");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.id) return parsed;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_CONTACT;
+  });
 
   useEffect(() => {
+    try {
+      const cached = localStorage.getItem("prasanna_cached_contact_data");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.id) setData(parsed);
+      }
+    } catch (e) {}
+
     async function fetchContact() {
       try {
         const res = await fetch(`${API_BASE}/api/contact`);
@@ -39,10 +58,13 @@ export default function Contact() {
           const json = await res.json();
           if (json && json.id) {
             setData((prev) => ({ ...prev, ...json }));
+            try {
+              localStorage.setItem("prasanna_cached_contact_data", JSON.stringify(json));
+            } catch (e) {}
           }
         }
       } catch (err) {
-        console.warn("Contact API not reachable, using default data:", err);
+        console.warn("Contact API not reachable, using cached contact data:", err);
       }
     }
 
@@ -56,26 +78,15 @@ export default function Contact() {
     data.whatsapp_message || "Hi Prasanna, I would like to discuss a film/production project with you."
   )}`;
 
-  const galleryImages = [
-    data.image1 || "/images/commercial.jpg",
-    data.image2 || "/images/about.jpg",
-    data.image3 || "/images/hero.png",
-    data.image4 || "/images/commercial.jpg",
-    data.image5 || "/images/about.jpg",
-    data.image6 || "/images/hero.png",
-  ];
-
   return (
     <section
       id="contact"
       className="bg-[#080B11] text-white py-16 md:py-24 px-6 md:px-12 select-none border-t border-white/5 relative"
     >
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-10 lg:gap-14 items-start relative z-10">
-        {/* Left Side (Contact Information) */}
-        <div className="lg:col-span-7">
-          <ScrollReveal animation="slide-up" className="space-y-6">
-            <div>
-              <span className="text-xs uppercase tracking-[4px] text-orange-400 font-bold block mb-2">
+      <div className="max-w-4xl mx-auto relative z-10">
+        <ScrollReveal animation="slide-up" className="space-y-6">
+          <div className="text-center sm:text-left">
+            <span className="text-xs uppercase tracking-[4px] text-orange-400 font-bold block mb-2">
               {data.subheading || "DIRECTOR & CINEMATOGRAPHER"}
             </span>
             <h2 className="designer-font text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white">
@@ -197,57 +208,6 @@ export default function Contact() {
             </div>
           </div>
         </ScrollReveal>
-      </div>
-
-        {/* Right Side (Visual Feed Showcase) */}
-        <div className="lg:col-span-5">
-          <ScrollReveal delay={150} animation="slide-up">
-            <div className="bg-white/[0.02] border border-white/10 p-5 sm:p-6 rounded-2xl space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] uppercase font-bold tracking-[2px] text-orange-400">
-                    Visual Feed
-                  </span>
-                  <h3 className="text-base font-bold text-white">Selected Captures</h3>
-                </div>
-                <span className="text-[10px] font-mono text-gray-500">Curated Work</span>
-              </div>
-
-              {/* 3x2 Curated Photo Grid */}
-              <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-                {galleryImages.map((img, i) => (
-                  <div
-                    key={`feed-img-${i}`}
-                    className="aspect-square rounded-xl overflow-hidden bg-black/40 border border-white/5 group relative"
-                  >
-                    <img
-                      src={img}
-                      alt={`Portfolio Capture ${i + 1}`}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                      onError={(e) => {
-                        e.currentTarget.src = "/images/commercial.jpg";
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
-                  </div>
-                ))}
-              </div>
-
-              {/* Instagram Link CTA Button */}
-              <a
-                href={data.instagram_button_url || data.instagram || "https://instagram.com"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 px-4 rounded-xl font-medium text-xs tracking-wider text-gray-200 hover:text-white bg-white/5 hover:bg-orange-500 border border-white/10 hover:border-orange-500 transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer"
-              >
-                <span>{data.instagram_button_text || "Follow on Instagram →"}</span>
-                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </a>
-            </div>
-          </ScrollReveal>
-        </div>
       </div>
     </section>
   );

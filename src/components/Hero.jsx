@@ -5,42 +5,98 @@ import { parseVideoUrl } from "@/lib/videoUtils";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-// Fallback high-impact cinematic banners if DB is loading or empty
+// Live high-impact cinematic banners (matches active database records)
 const DEFAULT_BANNERS = [
   {
-    id: 1,
-    title: "Expert Care For Every Ride",
-    subtitle: "ROYAL ENFIELD CAMPAIGN",
-    description: "Serviced with passion, delivered with precision. A cinematic journey of machine love and raw power.",
-    background_image: "/images/hero.png",
-    video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    id: 8,
+    title: "",
+    subtitle: "",
+    description: "",
+    background_image: "https://prassana-backend.onrender.com/api/upload/media/30001",
+    video_url: "https://www.instagram.com/reel/DZNDD_wPdkV/?stkn=bm03YWU5czRxbzlq",
+    order_index: 1,
   },
   {
-    id: 2,
-    title: "Cinematic Vision In Every Frame",
-    subtitle: "DIRECTOR & CINEMATOGRAPHER",
-    description: "Transforming ambitious commercial ideas into timeless, emotionally resonant visual stories.",
-    background_image: "/images/commercial.jpg",
-    video_url: "https://www.youtube.com/watch?v=yiyq7fcqNHk",
+    id: 60009,
+    title: "",
+    subtitle: "",
+    description: "",
+    background_image: "https://prassana-backend.onrender.com/api/upload/media/90002",
+    video_url: "https://www.youtube.com/embed/PTnXUXSF4-8",
+    order_index: 2,
+  },
+  {
+    id: 1,
+    title: "",
+    subtitle: "",
+    description: "",
+    background_image: "https://prassana-backend.onrender.com/api/upload/media/30003",
+    video_url: "https://www.youtube.com/embed/5WiaUcFNYtA",
+    order_index: 3,
   },
   {
     id: 3,
     title: "",
     subtitle: "",
     description: "",
-    background_image: "/images/personal.jpg",
-    video_url: "https://www.youtube.com/watch?v=Ne9aVylBJmA",
+    background_image: "https://prassana-backend.onrender.com/api/upload/media/30004",
+    video_url: "https://www.youtube.com/embed/klhQIWvOC-U",
+    order_index: 4,
+  },
+  {
+    id: 2,
+    title: "",
+    subtitle: "",
+    description: "",
+    background_image: "https://prassana-backend.onrender.com/api/upload/media/30005",
+    video_url: "https://www.youtube.com/embed/CstXyn49IdE",
+    order_index: 5,
   },
 ];
 
 export default function Hero() {
-  const [banners, setBanners] = useState(DEFAULT_BANNERS);
+  const [banners, setBanners] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("prasanna_cached_hero_banners");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_BANNERS;
+  });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeVideo, setActiveVideo] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Preload all banner images into browser cache so transitions are instant
+  useEffect(() => {
+    if (Array.isArray(banners)) {
+      banners.forEach((b) => {
+        if (b && b.background_image) {
+          const img = new Image();
+          img.src = b.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+        }
+      });
+    }
+  }, [banners]);
+
   // Fetch live banners from backend MySQL database
   useEffect(() => {
+    // 1. Immediately check local storage cache if available
+    try {
+      const cached = localStorage.getItem("prasanna_cached_hero_banners");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setBanners(parsed);
+        }
+      }
+    } catch (e) {}
+
+    // 2. Refresh from backend in background
     async function fetchBanners() {
       try {
         const res = await fetch(`${API_BASE}/api/hero`);
@@ -48,10 +104,13 @@ export default function Hero() {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             setBanners(data);
+            try {
+              localStorage.setItem("prasanna_cached_hero_banners", JSON.stringify(data));
+            } catch (e) {}
           }
         }
       } catch (err) {
-        console.warn("Backend hero API not reachable, using default banners:", err);
+        console.warn("Backend hero API not reachable, using cached banners:", err);
       }
     }
 
@@ -67,13 +126,13 @@ export default function Hero() {
     setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
   }, [banners.length]);
 
-  // Auto-rotate carousel every 3 seconds
+  // Auto-rotate carousel every 6 seconds (smooth cinematic pacing with zero blackouts)
   useEffect(() => {
     if (activeVideo || banners.length <= 1) return;
 
     const timer = setInterval(() => {
       nextSlide();
-    }, 3000);
+    }, 6000);
 
     return () => clearInterval(timer);
   }, [activeVideo, banners.length, nextSlide]);
@@ -110,30 +169,29 @@ export default function Hero() {
         return (
           <div
             key={banner.id || index}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+            className={`absolute inset-0 bg-[#0B0E16] transition-opacity duration-1000 ease-in-out ${
               isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
             }`}
           >
             {/* Background Image with subtle Ken Burns effect */}
-            <img
-              src={
-                banner.background_image
-                  ? banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
-                  : "/images/hero.png"
-              }
-              alt={banner.title || "Hero banner"}
-              onError={(e) => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "/images/hero.png";
-              }}
-              className={`w-full h-full object-cover transition-transform duration-[7000ms] ease-out ${
-                isActive ? "scale-105" : "scale-100"
-              }`}
-            />
+            {banner.background_image && (
+              <img
+                src={banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
+                alt={banner.title || "Hero banner"}
+                loading={index === 0 ? "eager" : "lazy"}
+                decoding={index === 0 ? "sync" : "async"}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                onError={(e) => {
+                  console.warn("Hero banner image load issue for ID:", banner.id);
+                }}
+                className={`w-full h-full object-cover transition-transform duration-[7000ms] ease-out ${
+                  isActive ? "scale-105" : "scale-100"
+                }`}
+              />
+            )}
 
-            {/* Cinematic Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-black/20"></div>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B0E16] via-transparent to-black/40"></div>
+            {/* Subtle Bottom Ambient Gradient for button contrast only (no full-screen black shading) */}
+            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
           </div>
         );
       })}

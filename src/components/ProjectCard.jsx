@@ -12,9 +12,9 @@ export default function ProjectCard({ project, onOpenVideo }) {
   const parsedVideo = parseVideoUrl(rawUrl);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [imgSrc, setImgSrc] = useState(
-    getVideoCover(rawUrl, project.cover_image, project.thumbnail || "/images/commercial.jpg")
-  );
+  const [fallbackSrc, setFallbackSrc] = useState(null);
+  const computedCover = getVideoCover(rawUrl, project.cover_image, project.thumbnail || "/images/commercial.jpg");
+  const imgSrc = fallbackSrc || computedCover;
 
   const handleClick = () => {
     if (onOpenVideo && parsedVideo.embedUrl) {
@@ -26,9 +26,9 @@ export default function ProjectCard({ project, onOpenVideo }) {
 
   const handleImageError = () => {
     if (parsedVideo.type === "youtube" && parsedVideo.hqThumbnailUrl && imgSrc !== parsedVideo.hqThumbnailUrl) {
-      setImgSrc(parsedVideo.hqThumbnailUrl);
+      setFallbackSrc(parsedVideo.hqThumbnailUrl);
     } else {
-      setImgSrc("/images/commercial.jpg");
+      setFallbackSrc("/images/commercial.jpg");
     }
   };
 

@@ -103,6 +103,9 @@ export default function ContactAdminPage() {
 
       if (res.ok) {
         setMessage(data.message || "Contact details updated successfully!");
+        try {
+          localStorage.setItem("prasanna_cached_contact_data", JSON.stringify(form));
+        } catch (e) {}
       } else {
         setError(data.message || "Failed to update contact details");
       }

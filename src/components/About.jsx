@@ -7,14 +7,14 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const DEFAULT_ABOUT = {
   heading: "ABOUT ME",
-  subheading: "DIRECTOR & CINEMATOGRAPHER",
+  subheading: "STORYTELLER",
   bio_p1:
-    "I have years of experience creating documentaries, commercials and films for TV & digital platforms. My work focuses on visual storytelling that connects with audiences through emotion and creativity.",
+    "I’m Prasanna. Filmmaker. Director. Professional overthinker.\n\nI make documentaries, brand films and digital content about people, places, culture and things that I find interesting enough to point a camera at.\n\nI’ve spent the last few years travelling across India, living in an ashram, hitchhiking, chasing stories, and somehow turning all of that into a career.",
   bio_p2:
-    "Every project is crafted with attention to detail, cinematic composition and meaningful narratives. Explore my portfolio below to discover a collection of selected films and creative productions.",
-  image_url: "/images/about.jpg",
-  stat1_num: "",
-  stat1_label: "",
+    "My filmmaking brain is documentary-first: find the story, make it feel real, then make it look bloody good. I like fancy transitions too. I just prefer when they have a reason to exist.\n\nCurrently making Nothing Hits Like Rain, a feature documentary about the Indian monsoon, and Gods of Bharat, a series about India’s wonderfully chaotic culture.\nSo basically, I make films, and sometimes they even pay for themselves.",
+  image_url: "https://prassana-backend.onrender.com/api/upload/media/2",
+  stat1_num: "10+",
+  stat1_label: "Year Experience",
   stat2_num: "",
   stat2_label: "",
   stat3_num: "",
@@ -22,9 +22,31 @@ const DEFAULT_ABOUT = {
 };
 
 export default function About() {
-  const [data, setData] = useState(DEFAULT_ABOUT);
+  const [data, setData] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("prasanna_cached_about_data");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.heading) return parsed;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_ABOUT;
+  });
 
   useEffect(() => {
+    // Check localStorage cache on mount
+    try {
+      const cached = localStorage.getItem("prasanna_cached_about_data");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.heading) {
+          setData(parsed);
+        }
+      }
+    } catch (e) {}
+
     async function loadAbout() {
       try {
         const res = await fetch(`${API_BASE}/api/about`);
@@ -32,10 +54,18 @@ export default function About() {
           const json = await res.json();
           if (json && json.heading) {
             setData((prev) => ({ ...prev, ...json }));
+            try {
+              localStorage.setItem("prasanna_cached_about_data", JSON.stringify(json));
+            } catch (e) {}
+            // Preload portrait
+            if (json.image_url) {
+              const img = new Image();
+              img.src = json.image_url.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+            }
           }
         }
       } catch (err) {
-        console.warn("Using default about data:", err);
+        console.warn("Using cached about data:", err);
       }
     }
     loadAbout();
@@ -89,8 +119,7 @@ export default function About() {
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = "/images/about.jpg";
+                    console.warn("About image failed to load, preserving current state");
                   }}
                   className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
                 />

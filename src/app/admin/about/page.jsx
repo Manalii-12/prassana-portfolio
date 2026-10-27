@@ -91,6 +91,9 @@ export default function AdminAbout() {
       const data = await res.json();
       if (res.ok && data.success) {
         setMessage(data.message || "About Me profile card updated successfully!");
+        try {
+          localStorage.setItem("prasanna_cached_about_data", JSON.stringify(form));
+        } catch (e) {}
         setTimeout(() => setMessage(""), 4000);
       } else {
         setError(data.message || "Failed to update profile card.");

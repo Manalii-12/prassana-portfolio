@@ -55,6 +55,12 @@ export default function AdminHero() {
     video_url: "",
   });
 
+  const syncCache = (list) => {
+    try {
+      localStorage.setItem("prasanna_cached_hero_banners", JSON.stringify(list));
+    } catch (e) {}
+  };
+
   const loadBanners = async () => {
     try {
       setLoading(true);
@@ -62,6 +68,7 @@ export default function AdminHero() {
       if (res.ok) {
         const data = await res.json();
         setBanners(data);
+        syncCache(data);
       }
     } catch (err) {
       console.error("Failed to load hero banners:", err);
@@ -140,7 +147,11 @@ export default function AdminHero() {
       const data = await res.json();
       if (res.ok) {
         setMessage("Banner removed successfully.");
-        setBanners((prev) => prev.filter((b) => b.id !== id));
+        setBanners((prev) => {
+          const updated = prev.filter((b) => b.id !== id);
+          syncCache(updated);
+          return updated;
+        });
       } else {
         alert(data.message || "Failed to delete banner.");
       }
@@ -159,6 +170,7 @@ export default function AdminHero() {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     setBanners(shuffled);
+    syncCache(shuffled);
 
     try {
       const res = await fetch(`${API_BASE}/api/hero/reorder`, {
@@ -187,6 +199,7 @@ export default function AdminHero() {
     newBanners[targetIndex] = temp;
 
     setBanners(newBanners);
+    syncCache(newBanners);
 
     try {
       const res = await fetch(`${API_BASE}/api/hero/reorder`, {
@@ -231,9 +244,11 @@ export default function AdminHero() {
       const data = await res.json();
       if (res.ok) {
         setMessage(data.message || "Hero slide updated successfully!");
-        setBanners((prev) =>
-          prev.map((b) => (b.id === editingBanner.id ? { ...b, ...editForm } : b))
-        );
+        setBanners((prev) => {
+          const updated = prev.map((b) => (b.id === editingBanner.id ? { ...b, ...editForm } : b));
+          syncCache(updated);
+          return updated;
+        });
         setEditingBanner(null);
       } else {
         alert(data.message || "Failed to update hero slide");

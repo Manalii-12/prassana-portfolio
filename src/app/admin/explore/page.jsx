@@ -85,6 +85,9 @@ export default function AdminExplore() {
 
       if (res.ok) {
         setMessage(data.message || "Explore section updated successfully!");
+        try {
+          localStorage.setItem("prasanna_cached_explore_data", JSON.stringify(form));
+        } catch (e) {}
       } else {
         setError(data.message || "Failed to update explore section");
       }

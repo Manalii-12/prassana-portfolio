@@ -13,11 +13,33 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 import { parseVideoUrl } from "@/lib/videoUtils";
 
 export default function CommercialPage() {
-  const [projects, setProjects] = useState(commercialProjects);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("prasanna_cached_commercial_projects");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+    }
+    return commercialProjects;
+  });
+  const [loading, setLoading] = useState(false);
   const [activeVideo, setActiveVideo] = useState(null);
 
   useEffect(() => {
+    // Check localStorage cache on mount
+    try {
+      const cached = localStorage.getItem("prasanna_cached_commercial_projects");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setProjects(parsed);
+        }
+      }
+    } catch (e) {}
+
     async function fetchProjects() {
       try {
         const res = await fetch(`${API_BASE}/api/projects/commercial`);
@@ -25,10 +47,20 @@ export default function CommercialPage() {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
             setProjects(data);
+            try {
+              localStorage.setItem("prasanna_cached_commercial_projects", JSON.stringify(data));
+            } catch (e) {}
+            // Preload images
+            data.forEach((p) => {
+              if (p && p.cover_image) {
+                const img = new Image();
+                img.src = p.cover_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+              }
+            });
           }
         }
       } catch (err) {
-        console.warn("Backend not reachable, displaying static projects:", err);
+        console.warn("Backend not reachable, displaying cached commercial projects:", err);
       } finally {
         setLoading(false);
       }

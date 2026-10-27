@@ -12,15 +12,37 @@ const DEFAULT_EXPLORE = {
   commercial_title: "Commercial Projects",
   commercial_subtitle: "",
   commercial_image: "/images/commercial.jpg",
-  personal_title: "Personal Projects",
+  personal_title: "Passionate Projects",
   personal_subtitle: "",
   personal_image: "/images/personal.jpg",
 };
 
 export default function Portfolio() {
-  const [data, setData] = useState(DEFAULT_EXPLORE);
+  const [data, setData] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("prasanna_cached_explore_data");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.commercial_title || parsed.commercial_image)) return parsed;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_EXPLORE;
+  });
 
   useEffect(() => {
+    // Check localStorage cache on mount
+    try {
+      const cached = localStorage.getItem("prasanna_cached_explore_data");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && (parsed.commercial_title || parsed.commercial_image)) {
+          setData(parsed);
+        }
+      }
+    } catch (e) {}
+
     async function loadExploreData() {
       try {
         const res = await fetch(`${API_BASE}/api/explore`);
@@ -28,10 +50,20 @@ export default function Portfolio() {
           const json = await res.json();
           if (json && (json.commercial_title || json.commercial_image)) {
             setData((prev) => ({ ...prev, ...json }));
+            try {
+              localStorage.setItem("prasanna_cached_explore_data", JSON.stringify(json));
+            } catch (e) {}
+            // Preload images
+            [json.commercial_image, json.personal_image].forEach((imgUrl) => {
+              if (imgUrl) {
+                const img = new Image();
+                img.src = imgUrl.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+              }
+            });
           }
         }
       } catch (err) {
-        console.warn("Using default explore section data:", err);
+        console.warn("Using cached explore section data:", err);
       }
     }
 
@@ -82,20 +114,14 @@ export default function Portfolio() {
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
 
-                {/* Clean Dark Vignette Overlay (No color tint) */}
-                <div className="absolute inset-0 bg-black/55 group-hover:bg-black/45 transition duration-500"></div>
+                {/* Subtle Bottom Ambient Gradient for contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent group-hover:from-black/60 transition duration-500"></div>
 
-                {/* Clean White Text Overlay (Overlaid inside the box) */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                  <h3 className="designer-font text-white text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight transition duration-300">
+                {/* Left Corner Compact Title (no subtitle line) */}
+                <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
                     {data.commercial_title || "Commercial Projects"}
                   </h3>
-
-                  {data.commercial_subtitle?.trim() && (
-                    <p className="text-gray-300 text-xs sm:text-sm font-light mt-2 max-w-sm">
-                      {data.commercial_subtitle}
-                    </p>
-                  )}
                 </div>
               </div>
             </Link>
@@ -112,30 +138,23 @@ export default function Portfolio() {
                       ? data.personal_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
                       : "/images/personal.jpg"
                   }
-                  alt={data.personal_title || "Personal Projects"}
+                  alt={data.personal_title || "Passionate Projects"}
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = "/images/personal.jpg";
+                    console.warn("Explore personal image error");
                   }}
                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 />
 
-                {/* Clean Dark Vignette Overlay (No color tint) */}
-                <div className="absolute inset-0 bg-black/55 group-hover:bg-black/45 transition duration-500"></div>
+                {/* Subtle Bottom Ambient Gradient for contrast */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent group-hover:from-black/60 transition duration-500"></div>
 
-                {/* Clean White Text Overlay (Overlaid inside the box) */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                  <h3 className="designer-font text-white text-3xl sm:text-4xl md:text-5xl uppercase tracking-tight transition duration-300">
-                    {data.personal_title || "Personal Projects"}
+                {/* Left Corner Compact Title (no subtitle line) */}
+                <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
+                    {data.personal_title || "Passionate Projects"}
                   </h3>
-
-                  {data.personal_subtitle?.trim() && (
-                    <p className="text-gray-300 text-xs sm:text-sm font-light mt-2 max-w-sm">
-                      {data.personal_subtitle}
-                    </p>
-                  )}
                 </div>
               </div>
             </Link>

@@ -58,6 +58,15 @@ export default function ManageProjects() {
   });
   const [editLoading, setEditLoading] = useState(false);
 
+  const syncProjectsCache = (list) => {
+    try {
+      const commercial = list.filter((p) => p.type === "commercial");
+      const personal = list.filter((p) => p.type === "personal");
+      localStorage.setItem("prasanna_cached_commercial_projects", JSON.stringify(commercial));
+      localStorage.setItem("prasanna_cached_personal_projects", JSON.stringify(personal));
+    } catch (e) {}
+  };
+
   const loadProjects = async () => {
     try {
       setLoading(true);
@@ -65,6 +74,7 @@ export default function ManageProjects() {
       if (res.ok) {
         const data = await res.json();
         setProjects(data);
+        syncProjectsCache(data);
       } else {
         setMessage("Failed to load projects from server.");
       }
@@ -90,7 +100,11 @@ export default function ManageProjects() {
       const data = await res.json();
       if (res.ok) {
         setMessage(data.message || "Project deleted successfully");
-        setProjects((prev) => prev.filter((p) => p.id !== id));
+        setProjects((prev) => {
+          const updated = prev.filter((p) => p.id !== id);
+          syncProjectsCache(updated);
+          return updated;
+        });
       } else {
         alert(data.message || "Failed to delete project");
       }
@@ -132,9 +146,11 @@ export default function ManageProjects() {
 
       if (res.ok) {
         setMessage(data.message || "Project updated successfully!");
-        setProjects((prev) =>
-          prev.map((item) => (item.id === editForm.id ? { ...item, ...editForm } : item))
-        );
+        setProjects((prev) => {
+          const updated = prev.map((item) => (item.id === editForm.id ? { ...item, ...editForm } : item));
+          syncProjectsCache(updated);
+          return updated;
+        });
         setEditingProject(null);
       } else {
         alert(data.message || "Failed to update project");

@@ -67,6 +67,10 @@ export default function ProjectsPage() {
 
       if (res.ok) {
         setMessage(data.message || "Project Added Successfully!");
+        try {
+          localStorage.removeItem("prasanna_cached_commercial_projects");
+          localStorage.removeItem("prasanna_cached_personal_projects");
+        } catch (e) {}
         setForm({
           type: "commercial",
           title: "",
