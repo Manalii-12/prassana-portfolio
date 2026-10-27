@@ -167,7 +167,15 @@ export default function Hero() {
   const currentVideoParsed = parseVideoUrl(currentBanner.video_url);
 
   return (
-    <section className="relative h-screen w-full overflow-hidden bg-black select-none">
+    <section
+      onClick={(e) => {
+        if (e.target.closest("button") || e.target.closest("a") || e.target.closest("iframe")) {
+          return;
+        }
+        nextSlide();
+      }}
+      className="relative h-screen w-full overflow-hidden bg-black select-none cursor-pointer"
+    >
       {/* Background Slides with Crossfade */}
       {banners.map((banner, index) => {
         const isActive = index === currentIndex;
@@ -234,11 +242,12 @@ export default function Hero() {
             </p>
           )}
 
-          {/* Action Buttons: Anchored consistently in the exact same position */}
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2">
+          {/* Action Buttons: Anchored consistently in the exact same position (raised 3px upward on mobile) */}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2 -translate-y-[3px] sm:translate-y-0">
             {/* Watch The Film Button */}
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 const target = currentVideoParsed.embedUrl
                   ? currentVideoParsed
                   : parseVideoUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
@@ -257,6 +266,7 @@ export default function Hero() {
             {/* Secondary CTA Button */}
             <a
               href="#portfolio"
+              onClick={(e) => e.stopPropagation()}
               className="inline-flex items-center gap-2 px-4 sm:px-7 py-3 sm:py-4 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white border border-orange-500/40 backdrop-blur-md font-bold text-[11px] sm:text-xs tracking-[2px] uppercase transition-all duration-300 hover:scale-105 cursor-pointer"
             >
               <span>EXPLORE WORK</span>
@@ -270,16 +280,22 @@ export default function Hero() {
       {banners.length > 1 && (
         <>
           <button
-            onClick={prevSlide}
+            onClick={(e) => {
+              e.stopPropagation();
+              prevSlide();
+            }}
             aria-label="Previous Slide"
-            className="hidden sm:flex absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/40 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white items-center justify-center transition hover:scale-110"
+            className="hidden sm:flex absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/40 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white items-center justify-center transition hover:scale-110 cursor-pointer"
           >
             ←
           </button>
           <button
-            onClick={nextSlide}
+            onClick={(e) => {
+              e.stopPropagation();
+              nextSlide();
+            }}
             aria-label="Next Slide"
-            className="hidden sm:flex absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/40 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white items-center justify-center transition hover:scale-110"
+            className="hidden sm:flex absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-black/40 hover:bg-white/20 border border-white/10 backdrop-blur-md text-white items-center justify-center transition hover:scale-110 cursor-pointer"
           >
             →
           </button>
@@ -294,9 +310,12 @@ export default function Hero() {
             return (
               <button
                 key={index}
-                onClick={() => setCurrentIndex(index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentIndex(index);
+                }}
                 aria-label={`Go to slide ${index + 1}`}
-                className={`transition-all duration-500 rounded-full h-2 ${
+                className={`transition-all duration-500 rounded-full h-2 cursor-pointer ${
                   isActive
                     ? "w-8 bg-orange-500"
                     : "w-2 bg-white/40 hover:bg-white/70"
