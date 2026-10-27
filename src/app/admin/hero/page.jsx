@@ -43,6 +43,7 @@ export default function AdminHero() {
     subtitle: "",
     description: "",
     background_image: "",
+    mobile_background_image: "",
     video_url: "",
   });
   const [editLoading, setEditLoading] = useState(false);
@@ -52,6 +53,7 @@ export default function AdminHero() {
     subtitle: "",
     description: "",
     background_image: "",
+    mobile_background_image: "",
     video_url: "",
   });
 
@@ -123,6 +125,7 @@ export default function AdminHero() {
           subtitle: "",
           description: "",
           background_image: "",
+          mobile_background_image: "",
           video_url: "",
         });
         loadBanners();
@@ -225,6 +228,7 @@ export default function AdminHero() {
       subtitle: banner.subtitle || "",
       description: banner.description || "",
       background_image: banner.background_image || "",
+      mobile_background_image: banner.mobile_background_image || "",
       video_url: banner.video_url || "",
     });
   };
@@ -408,18 +412,22 @@ export default function AdminHero() {
                 />
               </div>
 
-              {/* Background Image Upload */}
+              {/* Desktop Background Image Upload */}
               <ImageUpload
-                label="Banner Background Image"
+                label="Desktop Banner Image (16:9 Widescreen)"
                 value={form.background_image}
                 onChange={(url) => setForm({ ...form, background_image: url })}
                 required={true}
-                helperText="Upload banner image from your computer (JPG, PNG, WebP up to 15MB)"
-                presetOptions={[
-                  { label: "Preset: hero.png", value: "/images/hero.png" },
-                  { label: "Preset: commercial.jpg", value: "/images/commercial.jpg" },
-                  { label: "Preset: personal.jpg", value: "/images/personal.jpg" },
-                ]}
+                helperText="Recommended Size: 1920 × 1080 px (16:9 Cinema Landscape). Fits laptops & desktop displays."
+              />
+
+              {/* Mobile Banner Image Upload */}
+              <ImageUpload
+                label="Mobile Banner Image (Optional - 9:16 Vertical Cinema Poster)"
+                value={form.mobile_background_image || ""}
+                onChange={(url) => setForm({ ...form, mobile_background_image: url })}
+                required={false}
+                helperText="Recommended Size: 1080 × 1920 px (9:16 Vertical Poster). Fits phone screens full-bleed edge-to-edge!"
               />
 
               {/* Video URL */}
@@ -791,18 +799,22 @@ export default function AdminHero() {
                   />
                 </div>
 
-                {/* Banner Background Image */}
+                {/* Desktop Background Image */}
                 <ImageUpload
-                  label="Banner Background Image"
+                  label="Desktop Banner Image (16:9 Widescreen)"
                   value={editForm.background_image}
                   onChange={(url) => setEditForm({ ...editForm, background_image: url })}
                   required={true}
-                  helperText="Upload new image or select a preset"
-                  presetOptions={[
-                    { label: "Preset: hero.png", value: "/images/hero.png" },
-                    { label: "Preset: commercial.jpg", value: "/images/commercial.jpg" },
-                    { label: "Preset: personal.jpg", value: "/images/personal.jpg" },
-                  ]}
+                  helperText="Recommended Size: 1920 × 1080 px (16:9 Cinema Landscape). Fits laptops & desktop displays."
+                />
+
+                {/* Mobile Banner Image */}
+                <ImageUpload
+                  label="Mobile Banner Image (Optional - 9:16 Vertical Cinema Poster)"
+                  value={editForm.mobile_background_image || ""}
+                  onChange={(url) => setEditForm({ ...editForm, mobile_background_image: url })}
+                  required={false}
+                  helperText="Recommended Size: 1080 × 1920 px (9:16 Vertical Poster). Fits phone screens full-bleed edge-to-edge!"
                 />
 
                 {/* Video URL */}

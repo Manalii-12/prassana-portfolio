@@ -13,6 +13,7 @@ const DEFAULT_BANNERS = [
     subtitle: "",
     description: "",
     background_image: "https://prassana-backend.onrender.com/api/upload/media/30001",
+    mobile_background_image: "https://prassana-backend.onrender.com/api/upload/media/150001",
     video_url: "https://www.instagram.com/reel/DZNDD_wPdkV/?stkn=bm03YWU5czRxbzlq",
     order_index: 1,
   },
@@ -78,6 +79,10 @@ export default function Hero() {
         if (b && b.background_image) {
           const img = new Image();
           img.src = b.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+        }
+        if (b && b.mobile_background_image) {
+          const mImg = new Image();
+          mImg.src = b.mobile_background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
         }
       });
     }
@@ -173,21 +178,29 @@ export default function Hero() {
               isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
             }`}
           >
-            {/* Cinematic Full-Bleed Image: Perfect focal alignment on mobile with rule-of-thirds eye-level framing */}
+            {/* Cinematic Full-Bleed Image: Supports dedicated 9:16 vertical poster on mobile, or 16:9 widescreen master with 35% eye-level focal alignment */}
             {banner.background_image && (
-              <img
-                src={banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
-                alt={banner.title || "Hero banner"}
-                loading={index === 0 ? "eager" : "lazy"}
-                decoding={index === 0 ? "sync" : "async"}
-                fetchPriority={index === 0 ? "high" : "auto"}
-                onError={(e) => {
-                  console.warn("Hero banner image load issue for ID:", banner.id);
-                }}
-                className={`w-full h-full object-cover object-[center_35%] sm:object-center transition-transform duration-[7000ms] ease-out ${
-                  isActive ? "scale-105" : "scale-100"
-                }`}
-              />
+              <picture className="w-full h-full block">
+                {banner.mobile_background_image && (
+                  <source
+                    media="(max-width: 640px)"
+                    srcSet={banner.mobile_background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
+                  />
+                )}
+                <img
+                  src={banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
+                  alt={banner.title || "Hero banner"}
+                  loading={index === 0 ? "eager" : "lazy"}
+                  decoding={index === 0 ? "sync" : "async"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  onError={(e) => {
+                    console.warn("Hero banner image load issue for ID:", banner.id);
+                  }}
+                  className={`w-full h-full object-cover object-[center_35%] sm:object-center transition-transform duration-[7000ms] ease-out ${
+                    isActive ? "scale-105" : "scale-100"
+                  }`}
+                />
+              </picture>
             )}
 
             {/* Soft bottom ambient fade for CTA button legibility (no full-screen shading) */}
