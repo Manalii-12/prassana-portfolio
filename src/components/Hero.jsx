@@ -13,7 +13,7 @@ const DEFAULT_BANNERS = [
     subtitle: "",
     description: "",
     background_image: "https://prassana-backend.onrender.com/api/upload/media/30001",
-    mobile_background_image: "https://prassana-backend.onrender.com/api/upload/media/150001",
+    mobile_background_image: "https://prassana-backend.onrender.com/api/upload/media/180001",
     video_url: "https://www.instagram.com/reel/DZNDD_wPdkV/?stkn=bm03YWU5czRxbzlq",
     order_index: 1,
   },
@@ -23,6 +23,7 @@ const DEFAULT_BANNERS = [
     subtitle: "",
     description: "",
     background_image: "https://prassana-backend.onrender.com/api/upload/media/90002",
+    mobile_background_image: "https://prassana-backend.onrender.com/api/upload/media/150002",
     video_url: "https://www.youtube.com/embed/PTnXUXSF4-8",
     order_index: 2,
   },
@@ -32,6 +33,7 @@ const DEFAULT_BANNERS = [
     subtitle: "",
     description: "",
     background_image: "https://prassana-backend.onrender.com/api/upload/media/30003",
+    mobile_background_image: "https://prassana-backend.onrender.com/api/upload/media/180003",
     video_url: "https://www.youtube.com/embed/5WiaUcFNYtA",
     order_index: 3,
   },
@@ -41,6 +43,7 @@ const DEFAULT_BANNERS = [
     subtitle: "",
     description: "",
     background_image: "https://prassana-backend.onrender.com/api/upload/media/30004",
+    mobile_background_image: "https://prassana-backend.onrender.com/api/upload/media/180002",
     video_url: "https://www.youtube.com/embed/klhQIWvOC-U",
     order_index: 4,
   },
@@ -50,20 +53,23 @@ const DEFAULT_BANNERS = [
     subtitle: "",
     description: "",
     background_image: "https://prassana-backend.onrender.com/api/upload/media/30005",
+    mobile_background_image: "https://prassana-backend.onrender.com/api/upload/media/150003",
     video_url: "https://www.youtube.com/embed/CstXyn49IdE",
     order_index: 5,
   },
 ];
 
-const CACHE_KEY = "prasanna_cached_hero_banners_v3";
+const CACHE_KEY = "prasanna_cached_hero_banners_v5";
 
 export default function Hero() {
   const [banners, setBanners] = useState(() => {
     if (typeof window !== "undefined") {
       try {
-        // Purge legacy cache that lacked mobile_background_image
+        // Purge legacy caches that held older images
         localStorage.removeItem("prasanna_cached_hero_banners");
         localStorage.removeItem("prasanna_cached_hero_banners_v2");
+        localStorage.removeItem("prasanna_cached_hero_banners_v3");
+        localStorage.removeItem("prasanna_cached_hero_banners_v4");
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);

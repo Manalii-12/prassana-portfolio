@@ -57,12 +57,15 @@ export default function AdminHero() {
     video_url: "",
   });
 
-  const CACHE_KEY = "prasanna_cached_hero_banners_v3";
+  const CACHE_KEY = "prasanna_cached_hero_banners_v5";
 
   const syncCache = (list) => {
     try {
       localStorage.setItem(CACHE_KEY, JSON.stringify(list));
       localStorage.removeItem("prasanna_cached_hero_banners");
+      localStorage.removeItem("prasanna_cached_hero_banners_v2");
+      localStorage.removeItem("prasanna_cached_hero_banners_v3");
+      localStorage.removeItem("prasanna_cached_hero_banners_v4");
     } catch (e) {}
   };
 

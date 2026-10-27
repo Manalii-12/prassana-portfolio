@@ -32,16 +32,7 @@ export default function Navbar({ openContact }) {
 
   return (
     <header className="absolute top-0 left-0 w-full z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between md:justify-center px-6 sm:px-8 py-6 md:py-8">
-        {/* Mobile Brand Tag (visible only on mobile) */}
-        <a
-          href="#"
-          className="md:hidden font-black text-sm tracking-[3px] text-white flex items-center gap-2"
-        >
-          <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-          <span>PRASANNA</span>
-        </a>
-
+      <div className="max-w-7xl mx-auto flex items-center justify-end md:justify-center px-6 sm:px-8 py-6 md:py-8">
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center justify-center gap-10">
           {navLinks.map((item) => (
