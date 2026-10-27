@@ -169,11 +169,23 @@ export default function Hero() {
         return (
           <div
             key={banner.id || index}
-            className={`absolute inset-0 bg-[#0B0E16] transition-opacity duration-1000 ease-in-out ${
+            className={`absolute inset-0 bg-[#080B11] transition-opacity duration-1000 ease-in-out ${
               isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
             }`}
           >
-            {/* Background Image with subtle Ken Burns effect */}
+            {/* Ambient Blurred Cinema Glow on mobile to give a rich theater feel */}
+            {banner.background_image && (
+              <div className="sm:hidden absolute inset-0 overflow-hidden pointer-events-none">
+                <img
+                  src={banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-full object-cover blur-3xl opacity-35 scale-125"
+                />
+              </div>
+            )}
+
+            {/* Main Cinematic Image: Contained in natural movie aspect ratio on mobile, full-screen cover on desktop */}
             {banner.background_image && (
               <img
                 src={banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
@@ -184,14 +196,14 @@ export default function Hero() {
                 onError={(e) => {
                   console.warn("Hero banner image load issue for ID:", banner.id);
                 }}
-                className={`w-full h-full object-cover transition-transform duration-[7000ms] ease-out ${
-                  isActive ? "scale-105" : "scale-100"
+                className={`relative z-10 w-full h-full object-contain sm:object-cover object-center transition-transform duration-[7000ms] ease-out ${
+                  isActive ? "scale-100 sm:scale-105" : "scale-100"
                 }`}
               />
             )}
 
             {/* Subtle Bottom Ambient Gradient for button contrast only (no full-screen black shading) */}
-            <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+            <div className="absolute inset-x-0 bottom-0 h-40 sm:h-48 bg-gradient-to-t from-black/70 to-transparent pointer-events-none z-10"></div>
           </div>
         );
       })}
@@ -222,7 +234,7 @@ export default function Hero() {
           )}
 
           {/* Action Buttons: Anchored consistently in the exact same position */}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2">
             {/* Watch The Film Button */}
             <button
               onClick={() => {
@@ -231,9 +243,9 @@ export default function Hero() {
                   : parseVideoUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                 setActiveVideo(target);
               }}
-              className="group relative inline-flex items-center gap-3 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/30 hover:border-white backdrop-blur-md font-bold text-xs tracking-[2px] uppercase transition-all duration-300 shadow-2xl hover:scale-105 cursor-pointer"
+              className="group relative inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-7 py-3 sm:py-4 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/30 hover:border-white backdrop-blur-md font-bold text-[11px] sm:text-xs tracking-[2px] uppercase transition-all duration-300 shadow-2xl hover:scale-105 cursor-pointer"
             >
-              <span className="w-6 h-6 rounded-full bg-white/20 group-hover:bg-black/20 flex items-center justify-center text-xs transition">
+              <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 group-hover:bg-black/20 flex items-center justify-center text-xs transition">
                 ▶
               </span>
               <span>
@@ -244,7 +256,7 @@ export default function Hero() {
             {/* Secondary CTA Button */}
             <a
               href="#portfolio"
-              className="inline-flex items-center gap-2 px-6 sm:px-7 py-3.5 sm:py-4 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white border border-orange-500/40 backdrop-blur-md font-bold text-xs tracking-[2px] uppercase transition-all duration-300 hover:scale-105 cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 sm:px-7 py-3 sm:py-4 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white border border-orange-500/40 backdrop-blur-md font-bold text-[11px] sm:text-xs tracking-[2px] uppercase transition-all duration-300 hover:scale-105 cursor-pointer"
             >
               <span>EXPLORE WORK</span>
               <span>↓</span>
