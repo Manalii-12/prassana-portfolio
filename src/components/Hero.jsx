@@ -254,7 +254,7 @@ export default function Hero() {
           )}
 
           {/* Action Buttons: Anchored consistently in the exact same position (raised 3px upward on mobile) */}
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 pt-2 -translate-y-[3px] sm:translate-y-0">
+          <div className="flex items-center gap-2.5 sm:gap-4 pt-2 -translate-y-[3px] sm:translate-y-0 w-full sm:w-auto">
             {/* Watch The Film Button */}
             <button
               onClick={(e) => {
@@ -264,9 +264,9 @@ export default function Hero() {
                   : parseVideoUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
                 setActiveVideo(target);
               }}
-              className="group relative inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-7 py-3 sm:py-4 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/30 hover:border-white backdrop-blur-md font-bold text-[11px] sm:text-xs tracking-[2px] uppercase transition-all duration-300 shadow-2xl hover:scale-105 cursor-pointer"
+              className="group relative flex-1 sm:flex-none sm:w-56 h-12 sm:h-14 inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 rounded-xl bg-white/10 hover:bg-white text-white hover:text-black border border-white/30 hover:border-white backdrop-blur-md font-bold text-[10px] sm:text-xs tracking-[1px] sm:tracking-[2px] uppercase transition-all duration-300 shadow-2xl hover:scale-105 cursor-pointer whitespace-nowrap"
             >
-              <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 group-hover:bg-black/20 flex items-center justify-center text-xs transition">
+              <span className="w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 rounded-full bg-white/20 group-hover:bg-black/20 flex items-center justify-center text-[9px] sm:text-xs transition shrink-0">
                 ▶
               </span>
               <span>
@@ -278,10 +278,10 @@ export default function Hero() {
             <a
               href="#portfolio"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-2 px-4 sm:px-7 py-3 sm:py-4 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white border border-orange-500/40 backdrop-blur-md font-bold text-[11px] sm:text-xs tracking-[2px] uppercase transition-all duration-300 hover:scale-105 cursor-pointer"
+              className="flex-1 sm:flex-none sm:w-56 h-12 sm:h-14 inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-6 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-300 hover:text-white border border-orange-500/40 backdrop-blur-md font-bold text-[10px] sm:text-xs tracking-[1px] sm:tracking-[2px] uppercase transition-all duration-300 hover:scale-105 cursor-pointer whitespace-nowrap"
             >
               <span>EXPLORE WORK</span>
-              <span>↓</span>
+              <span className="text-xs sm:text-sm">↓</span>
             </a>
           </div>
         </div>
