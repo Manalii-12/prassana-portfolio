@@ -55,11 +55,16 @@ const DEFAULT_BANNERS = [
   },
 ];
 
+const CACHE_KEY = "prasanna_cached_hero_banners_v3";
+
 export default function Hero() {
   const [banners, setBanners] = useState(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = localStorage.getItem("prasanna_cached_hero_banners");
+        // Purge legacy cache that lacked mobile_background_image
+        localStorage.removeItem("prasanna_cached_hero_banners");
+        localStorage.removeItem("prasanna_cached_hero_banners_v2");
+        const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -92,7 +97,7 @@ export default function Hero() {
   useEffect(() => {
     // 1. Immediately check local storage cache if available
     try {
-      const cached = localStorage.getItem("prasanna_cached_hero_banners");
+      const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -110,7 +115,7 @@ export default function Hero() {
           if (Array.isArray(data) && data.length > 0) {
             setBanners(data);
             try {
-              localStorage.setItem("prasanna_cached_hero_banners", JSON.stringify(data));
+              localStorage.setItem(CACHE_KEY, JSON.stringify(data));
             } catch (e) {}
           }
         }
