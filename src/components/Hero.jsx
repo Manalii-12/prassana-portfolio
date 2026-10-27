@@ -169,23 +169,11 @@ export default function Hero() {
         return (
           <div
             key={banner.id || index}
-            className={`absolute inset-0 bg-[#080B11] transition-opacity duration-1000 ease-in-out ${
+            className={`absolute inset-0 bg-black transition-opacity duration-1000 ease-in-out ${
               isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
             }`}
           >
-            {/* Ambient Blurred Cinema Glow on mobile to give a rich theater feel */}
-            {banner.background_image && (
-              <div className="sm:hidden absolute inset-0 overflow-hidden pointer-events-none">
-                <img
-                  src={banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
-                  alt=""
-                  aria-hidden="true"
-                  className="w-full h-full object-cover blur-3xl opacity-35 scale-125"
-                />
-              </div>
-            )}
-
-            {/* Main Cinematic Image: Contained in natural movie aspect ratio on mobile, full-screen cover on desktop */}
+            {/* Cinematic Full-Bleed Image: Perfect focal alignment on mobile with rule-of-thirds eye-level framing */}
             {banner.background_image && (
               <img
                 src={banner.background_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")}
@@ -196,14 +184,14 @@ export default function Hero() {
                 onError={(e) => {
                   console.warn("Hero banner image load issue for ID:", banner.id);
                 }}
-                className={`relative z-10 w-full h-full object-contain sm:object-cover object-center transition-transform duration-[7000ms] ease-out ${
-                  isActive ? "scale-100 sm:scale-105" : "scale-100"
+                className={`w-full h-full object-cover object-[center_35%] sm:object-center transition-transform duration-[7000ms] ease-out ${
+                  isActive ? "scale-105" : "scale-100"
                 }`}
               />
             )}
 
-            {/* Subtle Bottom Ambient Gradient for button contrast only (no full-screen black shading) */}
-            <div className="absolute inset-x-0 bottom-0 h-40 sm:h-48 bg-gradient-to-t from-black/70 to-transparent pointer-events-none z-10"></div>
+            {/* Soft bottom ambient fade for CTA button legibility (no full-screen shading) */}
+            <div className="absolute inset-x-0 bottom-0 h-44 sm:h-52 bg-gradient-to-t from-black/80 via-black/25 to-transparent pointer-events-none z-10"></div>
           </div>
         );
       })}
