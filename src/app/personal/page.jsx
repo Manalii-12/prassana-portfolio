@@ -12,7 +12,30 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 import { parseVideoUrl } from "@/lib/videoUtils";
 
+const DEFAULT_PERSONAL_HEADER = {
+  personal_page_badge: "Personal Showcase",
+  personal_page_subtitle: "Narrative & Documentaries",
+  personal_page_title: "Personal Projects",
+  personal_page_description:
+    "Independent films, culture stories, and personal cinematic journeys captured with raw human emotion.",
+};
+
+const CACHE_HEADER_KEY = "prasanna_cached_personal_header_v1";
+
 export default function PersonalPage() {
+  const [headerData, setHeaderData] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem(CACHE_HEADER_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.personal_page_title || parsed.personal_page_badge)) return parsed;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_PERSONAL_HEADER;
+  });
+
   const [projects, setProjects] = useState(() => {
     if (typeof window !== "undefined") {
       try {
@@ -29,8 +52,15 @@ export default function PersonalPage() {
   const [activeVideo, setActiveVideo] = useState(null);
 
   useEffect(() => {
-    // Check localStorage cache on mount
+    // 1. Check cached header & project data
     try {
+      const cachedHeader = localStorage.getItem(CACHE_HEADER_KEY);
+      if (cachedHeader) {
+        const parsed = JSON.parse(cachedHeader);
+        if (parsed && (parsed.personal_page_title || parsed.personal_page_badge)) {
+          setHeaderData(parsed);
+        }
+      }
       const cached = localStorage.getItem("prasanna_cached_personal_projects");
       if (cached) {
         const parsed = JSON.parse(cached);
@@ -40,6 +70,28 @@ export default function PersonalPage() {
       }
     } catch (e) {}
 
+    // 2. Load latest header data from explore CMS
+    async function fetchHeaderData() {
+      try {
+        const res = await fetch(`${API_BASE}/api/explore?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && (data.personal_page_title || data.personal_page_badge)) {
+            setHeaderData((prev) => ({ ...prev, ...data }));
+            try {
+              localStorage.setItem(CACHE_HEADER_KEY, JSON.stringify(data));
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load fresh personal header data:", err);
+      }
+    }
+
+    // 3. Load latest projects from backend
     async function fetchProjects() {
       try {
         const res = await fetch(`${API_BASE}/api/projects/personal`);
@@ -66,6 +118,7 @@ export default function PersonalPage() {
       }
     }
 
+    fetchHeaderData();
     fetchProjects();
   }, []);
 
@@ -88,7 +141,7 @@ export default function PersonalPage() {
         </Link>
 
         <span className="text-[10px] font-bold uppercase tracking-[3px] text-orange-400 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20">
-          Personal Showcase
+          {headerData.personal_page_badge || "Personal Showcase"}
         </span>
       </div>
 
@@ -97,13 +150,14 @@ export default function PersonalPage() {
         <ScrollReveal animation="slide-up">
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-3">
             <p className="text-xs uppercase tracking-[5px] text-[#D98A63] font-semibold">
-              Narrative & Documentaries
+              {headerData.personal_page_subtitle || "Narrative & Documentaries"}
             </p>
             <h1 className="designer-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white">
-              Personal Projects
+              {headerData.personal_page_title || "Personal Projects"}
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 font-light max-w-xl mx-auto leading-relaxed">
-              Independent films, culture stories, and personal cinematic journeys captured with raw human emotion.
+              {headerData.personal_page_description ||
+                "Independent films, culture stories, and personal cinematic journeys captured with raw human emotion."}
             </p>
           </div>
         </ScrollReveal>

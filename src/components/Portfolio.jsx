@@ -12,19 +12,24 @@ const DEFAULT_EXPLORE = {
   commercial_title: "Commercial Projects",
   commercial_subtitle: "",
   commercial_image: "/images/commercial.jpg",
-  personal_title: "Passionate Projects",
+  personal_title: "Passion Projects",
   personal_subtitle: "",
   personal_image: "/images/personal.jpg",
 };
+
+const CACHE_KEY = "prasanna_cached_explore_data_v2";
 
 export default function Portfolio() {
   const [data, setData] = useState(() => {
     if (typeof window !== "undefined") {
       try {
-        const cached = localStorage.getItem("prasanna_cached_explore_data");
+        localStorage.removeItem("prasanna_cached_explore_data");
+        const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (parsed && (parsed.commercial_title || parsed.commercial_image)) return parsed;
+          if (parsed && (parsed.heading || parsed.commercial_title || parsed.commercial_image)) {
+            return parsed;
+          }
         }
       } catch (e) {}
     }
@@ -34,10 +39,11 @@ export default function Portfolio() {
   useEffect(() => {
     // Check localStorage cache on mount
     try {
-      const cached = localStorage.getItem("prasanna_cached_explore_data");
+      localStorage.removeItem("prasanna_cached_explore_data");
+      const cached = localStorage.getItem(CACHE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed && (parsed.commercial_title || parsed.commercial_image)) {
+        if (parsed && (parsed.heading || parsed.commercial_title || parsed.commercial_image)) {
           setData(parsed);
         }
       }
@@ -45,13 +51,19 @@ export default function Portfolio() {
 
     async function loadExploreData() {
       try {
-        const res = await fetch(`${API_BASE}/api/explore`);
+        const res = await fetch(`${API_BASE}/api/explore?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        });
         if (res.ok) {
           const json = await res.json();
-          if (json && (json.commercial_title || json.commercial_image)) {
+          if (json && (json.heading || json.commercial_title || json.commercial_image)) {
             setData((prev) => ({ ...prev, ...json }));
             try {
-              localStorage.setItem("prasanna_cached_explore_data", JSON.stringify(json));
+              localStorage.setItem(CACHE_KEY, JSON.stringify(json));
             } catch (e) {}
             // Preload images
             [json.commercial_image, json.personal_image].forEach((imgUrl) => {
@@ -138,7 +150,7 @@ export default function Portfolio() {
                       ? data.personal_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
                       : "/images/personal.jpg"
                   }
-                  alt={data.personal_title || "Passionate Projects"}
+                  alt={data.personal_title || "Passion Projects"}
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
@@ -153,7 +165,7 @@ export default function Portfolio() {
                 {/* Left Corner Compact Title (no subtitle line) */}
                 <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
                   <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
-                    {data.personal_title || "Passionate Projects"}
+                    {data.personal_title || "Passion Projects"}
                   </h3>
                 </div>
               </div>

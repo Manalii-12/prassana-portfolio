@@ -12,7 +12,30 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 import { parseVideoUrl } from "@/lib/videoUtils";
 
+const DEFAULT_COMMERCIAL_HEADER = {
+  commercial_page_badge: "Commercial Showcase",
+  commercial_page_subtitle: "Brand Films & Commercials",
+  commercial_page_title: "Commercial Projects",
+  commercial_page_description:
+    "High-impact brand campaigns, automotive reels, and directed commercial films created for TV & digital screens.",
+};
+
+const CACHE_HEADER_KEY = "prasanna_cached_commercial_header_v1";
+
 export default function CommercialPage() {
+  const [headerData, setHeaderData] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem(CACHE_HEADER_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && (parsed.commercial_page_title || parsed.commercial_page_badge)) return parsed;
+        }
+      } catch (e) {}
+    }
+    return DEFAULT_COMMERCIAL_HEADER;
+  });
+
   const [projects, setProjects] = useState(() => {
     if (typeof window !== "undefined") {
       try {
@@ -29,8 +52,15 @@ export default function CommercialPage() {
   const [activeVideo, setActiveVideo] = useState(null);
 
   useEffect(() => {
-    // Check localStorage cache on mount
+    // 1. Check cached header & project data
     try {
+      const cachedHeader = localStorage.getItem(CACHE_HEADER_KEY);
+      if (cachedHeader) {
+        const parsed = JSON.parse(cachedHeader);
+        if (parsed && (parsed.commercial_page_title || parsed.commercial_page_badge)) {
+          setHeaderData(parsed);
+        }
+      }
       const cached = localStorage.getItem("prasanna_cached_commercial_projects");
       if (cached) {
         const parsed = JSON.parse(cached);
@@ -40,6 +70,28 @@ export default function CommercialPage() {
       }
     } catch (e) {}
 
+    // 2. Load latest header data from explore CMS
+    async function fetchHeaderData() {
+      try {
+        const res = await fetch(`${API_BASE}/api/explore?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && (data.commercial_page_title || data.commercial_page_badge)) {
+            setHeaderData((prev) => ({ ...prev, ...data }));
+            try {
+              localStorage.setItem(CACHE_HEADER_KEY, JSON.stringify(data));
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load fresh commercial header data:", err);
+      }
+    }
+
+    // 3. Load latest projects from backend
     async function fetchProjects() {
       try {
         const res = await fetch(`${API_BASE}/api/projects/commercial`);
@@ -66,6 +118,7 @@ export default function CommercialPage() {
       }
     }
 
+    fetchHeaderData();
     fetchProjects();
   }, []);
 
@@ -88,7 +141,7 @@ export default function CommercialPage() {
         </Link>
 
         <span className="text-[10px] font-bold uppercase tracking-[3px] text-orange-400 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20">
-          Commercial Showcase
+          {headerData.commercial_page_badge || "Commercial Showcase"}
         </span>
       </div>
 
@@ -97,13 +150,14 @@ export default function CommercialPage() {
         <ScrollReveal animation="slide-up">
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-3">
             <p className="text-xs uppercase tracking-[5px] text-[#D98A63] font-semibold">
-              Brand Films & Commercials
+              {headerData.commercial_page_subtitle || "Brand Films & Commercials"}
             </p>
             <h1 className="designer-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white">
-              Commercial Projects
+              {headerData.commercial_page_title || "Commercial Projects"}
             </h1>
             <p className="text-xs sm:text-sm text-gray-400 font-light max-w-xl mx-auto leading-relaxed">
-              High-impact brand campaigns, automotive reels, and directed commercial films created for TV & digital screens.
+              {headerData.commercial_page_description ||
+                "High-impact brand campaigns, automotive reels, and directed commercial films created for TV & digital screens."}
             </p>
           </div>
         </ScrollReveal>
