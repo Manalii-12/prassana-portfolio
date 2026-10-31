@@ -86,12 +86,16 @@ export default function Contact() {
       <div className="max-w-4xl mx-auto relative z-10">
         <ScrollReveal animation="slide-up" className="space-y-6">
           <div className="text-center sm:text-left">
-            <span className="text-xs uppercase tracking-[4px] text-orange-400 font-bold block mb-2">
-              {data.subheading || "DIRECTOR & CINEMATOGRAPHER"}
-            </span>
-            <h2 className="designer-font text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white">
-              {data.heading || "CONTACT"}
-            </h2>
+            {data.subheading && data.subheading.trim() ? (
+              <span className="text-xs uppercase tracking-[4px] text-orange-400 font-bold block mb-2">
+                {data.subheading}
+              </span>
+            ) : null}
+            {data.heading && data.heading.trim() ? (
+              <h2 className="designer-font text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white">
+                {data.heading}
+              </h2>
+            ) : null}
           </div>
 
           <div className="space-y-4">

@@ -30,7 +30,7 @@ export default function PersonalPage() {
         const cached = localStorage.getItem(CACHE_HEADER_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (parsed && (parsed.personal_page_title || parsed.personal_page_badge)) {
+          if (parsed && typeof parsed === "object") {
             return { ...DEFAULT_PERSONAL_HEADER, ...parsed };
           }
         }
@@ -65,7 +65,7 @@ export default function PersonalPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data && (data.personal_page_title || data.personal_page_badge)) {
+        if (data && typeof data === "object") {
           const freshHeader = { ...DEFAULT_PERSONAL_HEADER, ...data };
           setHeaderData(freshHeader);
           try {
@@ -152,25 +152,34 @@ export default function PersonalPage() {
           <span>Back to Home</span>
         </Link>
 
-        <span className="text-[10px] font-bold uppercase tracking-[3px] text-orange-400 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20">
-          {headerData.personal_page_badge || "Personal Showcase"}
-        </span>
+        {headerData.personal_page_badge && headerData.personal_page_badge.trim() ? (
+          <span className="text-[10px] font-bold uppercase tracking-[3px] text-orange-400 px-3 py-1 rounded-full bg-orange-500/10 border border-orange-500/20">
+            {headerData.personal_page_badge}
+          </span>
+        ) : null}
       </div>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 md:px-12 pb-24">
         {/* Title Header */}
         <ScrollReveal animation="slide-up">
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 space-y-3">
-            <p className="text-xs uppercase tracking-[5px] text-[#D98A63] font-semibold">
-              {headerData.personal_page_subtitle || "Narrative & Documentaries"}
-            </p>
-            <h1 className="designer-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white">
-              {headerData.personal_page_title || "Personal Projects"}
-            </h1>
-            <p className="text-xs sm:text-sm text-gray-400 font-light max-w-xl mx-auto leading-relaxed">
-              {headerData.personal_page_description ||
-                "Independent films, culture stories, and personal cinematic journeys captured with raw human emotion."}
-            </p>
+            {headerData.personal_page_subtitle && headerData.personal_page_subtitle.trim() ? (
+              <p className="text-xs uppercase tracking-[5px] text-[#D98A63] font-semibold">
+                {headerData.personal_page_subtitle}
+              </p>
+            ) : null}
+
+            {headerData.personal_page_title && headerData.personal_page_title.trim() ? (
+              <h1 className="designer-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl uppercase tracking-tight text-white">
+                {headerData.personal_page_title}
+              </h1>
+            ) : null}
+
+            {headerData.personal_page_description && headerData.personal_page_description.trim() ? (
+              <p className="text-xs sm:text-sm text-gray-400 font-light max-w-xl mx-auto leading-relaxed">
+                {headerData.personal_page_description}
+              </p>
+            ) : null}
           </div>
         </ScrollReveal>
 

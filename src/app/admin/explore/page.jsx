@@ -67,19 +67,26 @@ export default function AdminExplore() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data && (data.commercial_title || data.heading)) {
+        if (data && typeof data === "object") {
           setForm((prev) => ({
             ...prev,
             ...data,
-            // Ensure defaults if empty from DB
-            commercial_page_badge: data.commercial_page_badge || prev.commercial_page_badge,
-            commercial_page_subtitle: data.commercial_page_subtitle || prev.commercial_page_subtitle,
-            commercial_page_title: data.commercial_page_title || prev.commercial_page_title,
-            commercial_page_description: data.commercial_page_description || prev.commercial_page_description,
-            personal_page_badge: data.personal_page_badge || prev.personal_page_badge,
-            personal_page_subtitle: data.personal_page_subtitle || prev.personal_page_subtitle,
-            personal_page_title: data.personal_page_title || prev.personal_page_title,
-            personal_page_description: data.personal_page_description || prev.personal_page_description,
+            heading: data.heading !== undefined && data.heading !== null ? data.heading : prev.heading,
+            subheading: data.subheading !== undefined && data.subheading !== null ? data.subheading : prev.subheading,
+            commercial_title: data.commercial_title !== undefined && data.commercial_title !== null ? data.commercial_title : prev.commercial_title,
+            commercial_subtitle: data.commercial_subtitle !== undefined && data.commercial_subtitle !== null ? data.commercial_subtitle : prev.commercial_subtitle,
+            commercial_image: data.commercial_image || prev.commercial_image,
+            personal_title: data.personal_title !== undefined && data.personal_title !== null ? data.personal_title : prev.personal_title,
+            personal_subtitle: data.personal_subtitle !== undefined && data.personal_subtitle !== null ? data.personal_subtitle : prev.personal_subtitle,
+            personal_image: data.personal_image || prev.personal_image,
+            commercial_page_badge: data.commercial_page_badge !== undefined && data.commercial_page_badge !== null ? data.commercial_page_badge : prev.commercial_page_badge,
+            commercial_page_subtitle: data.commercial_page_subtitle !== undefined && data.commercial_page_subtitle !== null ? data.commercial_page_subtitle : prev.commercial_page_subtitle,
+            commercial_page_title: data.commercial_page_title !== undefined && data.commercial_page_title !== null ? data.commercial_page_title : prev.commercial_page_title,
+            commercial_page_description: data.commercial_page_description !== undefined && data.commercial_page_description !== null ? data.commercial_page_description : prev.commercial_page_description,
+            personal_page_badge: data.personal_page_badge !== undefined && data.personal_page_badge !== null ? data.personal_page_badge : prev.personal_page_badge,
+            personal_page_subtitle: data.personal_page_subtitle !== undefined && data.personal_page_subtitle !== null ? data.personal_page_subtitle : prev.personal_page_subtitle,
+            personal_page_title: data.personal_page_title !== undefined && data.personal_page_title !== null ? data.personal_page_title : prev.personal_page_title,
+            personal_page_description: data.personal_page_description !== undefined && data.personal_page_description !== null ? data.personal_page_description : prev.personal_page_description,
           }));
         }
       }

@@ -28,7 +28,7 @@ export default function Portfolio() {
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (parsed && (parsed.heading || parsed.commercial_title || parsed.commercial_image)) {
+          if (parsed && typeof parsed === "object") {
             return { ...DEFAULT_EXPLORE, ...parsed };
           }
         }
@@ -48,7 +48,7 @@ export default function Portfolio() {
       });
       if (res.ok) {
         const json = await res.json();
-        if (json && (json.heading || json.commercial_title || json.commercial_image)) {
+        if (json && typeof json === "object") {
           const freshData = { ...DEFAULT_EXPLORE, ...json };
           setData(freshData);
           try {
@@ -99,15 +99,17 @@ export default function Portfolio() {
         {/* Heading (Loaded from Admin) */}
         <ScrollReveal animation="slide-up">
           <div className="text-center mb-10 md:mb-12">
-            {data.subheading && (
+            {data.subheading && data.subheading.trim() ? (
               <p className="uppercase tracking-[6px] text-[#D98A63] text-xs md:text-sm font-semibold mb-3">
                 {data.subheading}
               </p>
-            )}
+            ) : null}
 
-            <h2 className="designer-font text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white">
-              {data.heading || "EXPLORE MY WORK"}
-            </h2>
+            {data.heading && data.heading.trim() ? (
+              <h2 className="designer-font text-4xl sm:text-5xl md:text-6xl uppercase tracking-tight text-white">
+                {data.heading}
+              </h2>
+            ) : null}
           </div>
         </ScrollReveal>
 
@@ -138,11 +140,13 @@ export default function Portfolio() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent group-hover:from-black/60 transition duration-500"></div>
 
                 {/* Left Corner Compact Title (no subtitle line) */}
-                <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
-                    {data.commercial_title || "Commercial Projects"}
-                  </h3>
-                </div>
+                {data.commercial_title && data.commercial_title.trim() ? (
+                  <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
+                    <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
+                      {data.commercial_title}
+                    </h3>
+                  </div>
+                ) : null}
               </div>
             </Link>
           </ScrollReveal>
@@ -158,7 +162,7 @@ export default function Portfolio() {
                       ? data.personal_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
                       : "/images/personal.jpg"
                   }
-                  alt={data.personal_title || "Passionate Projects"}
+                  alt={data.personal_title || "Personal Projects"}
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
@@ -171,11 +175,13 @@ export default function Portfolio() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent group-hover:from-black/60 transition duration-500"></div>
 
                 {/* Left Corner Compact Title (no subtitle line) */}
-                <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
-                    {data.personal_title || "Passionate Projects"}
-                  </h3>
-                </div>
+                {data.personal_title && data.personal_title.trim() ? (
+                  <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
+                    <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
+                      {data.personal_title}
+                    </h3>
+                  </div>
+                ) : null}
               </div>
             </Link>
           </ScrollReveal>

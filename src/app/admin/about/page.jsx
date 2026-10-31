@@ -52,7 +52,7 @@ export default function AdminAbout() {
       const res = await fetch(`${API_BASE}/api/about`);
       if (res.ok) {
         const data = await res.json();
-        if (data && data.heading) {
+        if (data && typeof data === "object") {
           setForm((prev) => ({ ...prev, ...data }));
         }
       }

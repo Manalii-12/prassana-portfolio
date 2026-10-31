@@ -52,7 +52,7 @@ export default function About() {
         const res = await fetch(`${API_BASE}/api/about`);
         if (res.ok) {
           const json = await res.json();
-          if (json && json.heading) {
+          if (json && typeof json === "object") {
             setData((prev) => ({ ...prev, ...json }));
             try {
               localStorage.setItem("prasanna_cached_about_data", JSON.stringify(json));
@@ -73,7 +73,7 @@ export default function About() {
 
   // Format heading with copper accent on the last word
   const renderHeading = (text) => {
-    if (!text) return <span>ABOUT <span className="text-[#D98A63]">ME</span></span>;
+    if (!text || !text.trim()) return null;
     const words = text.trim().split(" ");
     if (words.length === 1) return <span>{words[0]}</span>;
     const lastWord = words.pop();
@@ -153,9 +153,11 @@ export default function About() {
               )}
 
               {/* Card Title */}
-              <h2 className="designer-font text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight leading-[1.05] text-white">
-                {renderHeading(data.heading)}
-              </h2>
+              {renderHeading(data.heading) && (
+                <h2 className="designer-font text-3xl sm:text-4xl lg:text-5xl uppercase tracking-tight leading-[1.05] text-white">
+                  {renderHeading(data.heading)}
+                </h2>
+              )}
 
               {/* Bio Paragraphs */}
               <div className="space-y-3 text-gray-300 text-xs sm:text-sm md:text-[15px] leading-relaxed font-light">
