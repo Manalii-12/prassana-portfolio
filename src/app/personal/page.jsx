@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import ProjectBentoGrid from "@/components/ProjectBentoGrid";
 import personalProjects from "@/data/personalProjects";
@@ -20,16 +20,19 @@ const DEFAULT_PERSONAL_HEADER = {
     "Independent films, culture stories, and personal cinematic journeys captured with raw human emotion.",
 };
 
-const CACHE_HEADER_KEY = "prasanna_cached_personal_header_v1";
+const CACHE_HEADER_KEY = "prasanna_cached_personal_header_v2";
 
 export default function PersonalPage() {
   const [headerData, setHeaderData] = useState(() => {
     if (typeof window !== "undefined") {
       try {
+        localStorage.removeItem("prasanna_cached_personal_header_v1");
         const cached = localStorage.getItem(CACHE_HEADER_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (parsed && (parsed.personal_page_title || parsed.personal_page_badge)) return parsed;
+          if (parsed && (parsed.personal_page_title || parsed.personal_page_badge)) {
+            return { ...DEFAULT_PERSONAL_HEADER, ...parsed };
+          }
         }
       } catch (e) {}
     }
@@ -51,76 +54,85 @@ export default function PersonalPage() {
   const [loading, setLoading] = useState(false);
   const [activeVideo, setActiveVideo] = useState(null);
 
-  useEffect(() => {
-    // 1. Check cached header & project data
+  const fetchHeaderData = useCallback(async () => {
     try {
-      const cachedHeader = localStorage.getItem(CACHE_HEADER_KEY);
-      if (cachedHeader) {
-        const parsed = JSON.parse(cachedHeader);
-        if (parsed && (parsed.personal_page_title || parsed.personal_page_badge)) {
-          setHeaderData(parsed);
+      const res = await fetch(`${API_BASE}/api/explore?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && (data.personal_page_title || data.personal_page_badge)) {
+          const freshHeader = { ...DEFAULT_PERSONAL_HEADER, ...data };
+          setHeaderData(freshHeader);
+          try {
+            localStorage.setItem(CACHE_HEADER_KEY, JSON.stringify(freshHeader));
+          } catch (e) {}
         }
       }
-      const cached = localStorage.getItem("prasanna_cached_personal_projects");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setProjects(parsed);
-        }
-      }
-    } catch (e) {}
-
-    // 2. Load latest header data from explore CMS
-    async function fetchHeaderData() {
-      try {
-        const res = await fetch(`${API_BASE}/api/explore?t=${Date.now()}`, {
-          cache: "no-store",
-          headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && (data.personal_page_title || data.personal_page_badge)) {
-            setHeaderData((prev) => ({ ...prev, ...data }));
-            try {
-              localStorage.setItem(CACHE_HEADER_KEY, JSON.stringify(data));
-            } catch (e) {}
-          }
-        }
-      } catch (err) {
-        console.warn("Could not load fresh personal header data:", err);
-      }
+    } catch (err) {
+      console.warn("Could not load fresh personal header data:", err);
     }
+  }, []);
 
-    // 3. Load latest projects from backend
-    async function fetchProjects() {
-      try {
-        const res = await fetch(`${API_BASE}/api/projects/personal`);
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setProjects(data);
-            try {
-              localStorage.setItem("prasanna_cached_personal_projects", JSON.stringify(data));
-            } catch (e) {}
-            // Preload images
-            data.forEach((p) => {
-              if (p && p.cover_image) {
-                const img = new Image();
-                img.src = p.cover_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
-              }
-            });
-          }
+  const fetchProjects = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/projects/personal?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setProjects(data);
+          try {
+            localStorage.setItem("prasanna_cached_personal_projects", JSON.stringify(data));
+          } catch (e) {}
+          // Preload images
+          data.forEach((p) => {
+            if (p && p.cover_image) {
+              const img = new Image();
+              img.src = p.cover_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+            }
+          });
         }
-      } catch (err) {
-        console.warn("Backend not reachable, displaying cached personal projects:", err);
-      } finally {
-        setLoading(false);
       }
+    } catch (err) {
+      console.warn("Backend not reachable, displaying cached personal projects:", err);
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
+  useEffect(() => {
+    // 1. Initial load
     fetchHeaderData();
     fetchProjects();
-  }, []);
+
+    // 2. Real-time tab sync
+    const handleSync = () => {
+      fetchHeaderData();
+      fetchProjects();
+    };
+
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("storage", handleSync);
+    window.addEventListener("exploreUpdated", handleSync);
+    document.addEventListener("visibilitychange", handleSync);
+
+    return () => {
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("storage", handleSync);
+      window.removeEventListener("exploreUpdated", handleSync);
+      document.removeEventListener("visibilitychange", handleSync);
+    };
+  }, [fetchHeaderData, fetchProjects]);
 
   const parsedActiveVideo = activeVideo
     ? typeof activeVideo === "object"

@@ -21,9 +21,9 @@ import {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-const CACHE_EXPLORE_KEY = "prasanna_cached_explore_data_v2";
-const CACHE_COMMERCIAL_KEY = "prasanna_cached_commercial_header_v1";
-const CACHE_PERSONAL_KEY = "prasanna_cached_personal_header_v1";
+const CACHE_EXPLORE_KEY = "prasanna_cached_explore_data_v3";
+const CACHE_COMMERCIAL_KEY = "prasanna_cached_commercial_header_v2";
+const CACHE_PERSONAL_KEY = "prasanna_cached_personal_header_v2";
 
 export default function AdminExplore() {
   const { isDark } = useAdminTheme();
@@ -106,9 +106,15 @@ export default function AdminExplore() {
   const syncCaches = (dataToSync) => {
     try {
       localStorage.removeItem("prasanna_cached_explore_data");
+      localStorage.removeItem("prasanna_cached_explore_data_v2");
+      localStorage.removeItem("prasanna_cached_commercial_header_v1");
+      localStorage.removeItem("prasanna_cached_personal_header_v1");
       localStorage.setItem(CACHE_EXPLORE_KEY, JSON.stringify(dataToSync));
       localStorage.setItem(CACHE_COMMERCIAL_KEY, JSON.stringify(dataToSync));
       localStorage.setItem(CACHE_PERSONAL_KEY, JSON.stringify(dataToSync));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("exploreUpdated"));
+      }
     } catch (e) {}
   };
 

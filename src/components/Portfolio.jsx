@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import ScrollReveal from "@/components/ScrollReveal";
 
@@ -12,23 +12,24 @@ const DEFAULT_EXPLORE = {
   commercial_title: "Commercial Projects",
   commercial_subtitle: "",
   commercial_image: "/images/commercial.jpg",
-  personal_title: "Passion Projects",
+  personal_title: "Passionate Projects",
   personal_subtitle: "",
   personal_image: "/images/personal.jpg",
 };
 
-const CACHE_KEY = "prasanna_cached_explore_data_v2";
+const CACHE_KEY = "prasanna_cached_explore_data_v3";
 
 export default function Portfolio() {
   const [data, setData] = useState(() => {
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem("prasanna_cached_explore_data");
+        localStorage.removeItem("prasanna_cached_explore_data_v2");
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed && (parsed.heading || parsed.commercial_title || parsed.commercial_image)) {
-            return parsed;
+            return { ...DEFAULT_EXPLORE, ...parsed };
           }
         }
       } catch (e) {}
@@ -36,51 +37,58 @@ export default function Portfolio() {
     return DEFAULT_EXPLORE;
   });
 
-  useEffect(() => {
-    // Check localStorage cache on mount
+  const loadExploreData = useCallback(async () => {
     try {
-      localStorage.removeItem("prasanna_cached_explore_data");
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed && (parsed.heading || parsed.commercial_title || parsed.commercial_image)) {
-          setData(parsed);
+      const res = await fetch(`${API_BASE}/api/explore?t=${Date.now()}`, {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+        },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && (json.heading || json.commercial_title || json.commercial_image)) {
+          const freshData = { ...DEFAULT_EXPLORE, ...json };
+          setData(freshData);
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
+          } catch (e) {}
+          // Preload images
+          [json.commercial_image, json.personal_image].forEach((imgUrl) => {
+            if (imgUrl) {
+              const img = new Image();
+              img.src = imgUrl.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
+            }
+          });
         }
       }
-    } catch (e) {}
-
-    async function loadExploreData() {
-      try {
-        const res = await fetch(`${API_BASE}/api/explore?t=${Date.now()}`, {
-          cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-          },
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (json && (json.heading || json.commercial_title || json.commercial_image)) {
-            setData((prev) => ({ ...prev, ...json }));
-            try {
-              localStorage.setItem(CACHE_KEY, JSON.stringify(json));
-            } catch (e) {}
-            // Preload images
-            [json.commercial_image, json.personal_image].forEach((imgUrl) => {
-              if (imgUrl) {
-                const img = new Image();
-                img.src = imgUrl.replace(/^http:\/\/prassana-backend/, "https://prassana-backend");
-              }
-            });
-          }
-        }
-      } catch (err) {
-        console.warn("Using cached explore section data:", err);
-      }
+    } catch (err) {
+      console.warn("Using cached explore section data:", err);
     }
-
-    loadExploreData();
   }, []);
+
+  useEffect(() => {
+    // 1. Initial immediate load
+    loadExploreData();
+
+    // 2. Re-fetch whenever tab becomes visible, window gains focus, or local storage changes
+    const handleSync = () => {
+      loadExploreData();
+    };
+
+    window.addEventListener("focus", handleSync);
+    window.addEventListener("storage", handleSync);
+    window.addEventListener("exploreUpdated", handleSync);
+    document.addEventListener("visibilitychange", handleSync);
+
+    return () => {
+      window.removeEventListener("focus", handleSync);
+      window.removeEventListener("storage", handleSync);
+      window.removeEventListener("exploreUpdated", handleSync);
+      document.removeEventListener("visibilitychange", handleSync);
+    };
+  }, [loadExploreData]);
 
   return (
     <section
@@ -150,7 +158,7 @@ export default function Portfolio() {
                       ? data.personal_image.replace(/^http:\/\/prassana-backend/, "https://prassana-backend")
                       : "/images/personal.jpg"
                   }
-                  alt={data.personal_title || "Passion Projects"}
+                  alt={data.personal_title || "Passionate Projects"}
                   loading="lazy"
                   decoding="async"
                   onError={(e) => {
@@ -165,7 +173,7 @@ export default function Portfolio() {
                 {/* Left Corner Compact Title (no subtitle line) */}
                 <div className="absolute bottom-5 left-5 sm:bottom-6 sm:left-6 text-left z-10">
                   <h3 className="text-sm sm:text-base md:text-lg font-bold uppercase tracking-wider text-white drop-shadow-md transition duration-300 group-hover:text-orange-400">
-                    {data.personal_title || "Passion Projects"}
+                    {data.personal_title || "Passionate Projects"}
                   </h3>
                 </div>
               </div>
